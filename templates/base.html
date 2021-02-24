@@ -9,6 +9,76 @@
     <title> {%block title%}  {%endblock %}</title>
 </head>
 <body>
+
+  <nav class="bg-white shadow dark:bg-gray-800">
+    <div class="container px-6 py-3 mx-auto">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex items-center justify-between">
+                <div class="text-xl font-semibold text-gray-700">
+                    <a class="text-xl font-bold text-gray-800 dark:text-white md:text-2xl hover:text-gray-700 dark:hover:text-gray-300" href="{%url 'home'%}">PlatAi</a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="flex md:hidden">
+                    <button type="button" class="text-gray-500 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none focus:text-gray-600 dark:focus:text-gray-400" aria-label="toggle menu">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current">
+                            <path fill-rule="evenodd" d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu open: "block", Menu closed: "hidden" -->
+            <div class="flex-1 md:flex md:items-center md:justify-between">
+                <div class="flex flex-col -mx-4 md:flex-row md:items-center md:mx-8">
+                    <a class="px-2 py-1 mx-2 mt-2 text-sm font-medium text-gray-700 transition-colors duration-200 transform rounded-md md:mt-0 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700" href="{%url 'home'%}">Home</a>
+                    <a href="{%url 'blog:post_list'%}" class="px-2 py-1 mx-2 mt-2 text-sm font-medium text-gray-700 transition-colors duration-200 transform rounded-md md:mt-0 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700">Resources</a>
+                    <a href="{%url 'contact'%}" class="px-2 py-1 mx-2 mt-2 text-sm font-medium text-gray-700 transition-colors duration-200 transform rounded-md md:mt-0 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700">Contact</a>
+                </div>
+
+
+                {%if user.is_authenticated %}
+                <li class="nav__item dropdown">
+                  <a href="#" class="nav__link dropdown__link">
+                      <span class="text-green-500">{{user.username}}</span>
+                      <i class='dropdown__icon'><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill:rgb(19, 244, 252);"><path d="M16.939 7.939L12 12.879 7.061 7.939 4.939 10.061 12 17.121 19.061 10.061z"></path></svg></i></a>
+    
+    
+                  <ul class="dropdown__menu">
+                      <li class="dropdown__item"><a href="{%url 'login_success'%}" class="nav__link">Edit</a></li>
+             
+                      <li class="dropdown__item"><a href="{%url 'logout'%}" class="nav__link">
+                              <span class="text-red-600">Logout</span> </a></li>
+                  </ul>
+              </li>
+               {%else %}
+               <a href="{%url 'login'%}">
+               <button type="button"
+                    class="ml-2 inline-flex text-white bg-purple-600 border-0 py-2 px-6 focus:outline-none   hover:bg-purple-700 rounded text-lg mb-2">
+                    
+                    
+                    LOGIN</button>
+                  </a>
+    
+                <div>
+    
+                  <a href="{%url 'register'%}">
+                    <button type="button"
+                         class="ml-2 inline-flex text-white bg-purple-600 border-0 py-2 px-6 focus:outline-none   hover:bg-purple-700 rounded text-lg mb-2">
+                         REGISTER</button>
+                       </a>
+         
+                </div>
+    
+              {%endif %}
+
+          
+            </div>
+        </div>
+    </div>
+</nav>
+
+
 {%block content %}
 
 

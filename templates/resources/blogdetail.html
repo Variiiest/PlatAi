@@ -1,0 +1,105 @@
+
+
+{% extends "base.html" %}
+{%load static %}
+
+
+{%block content %}
+
+
+<section class="text-gray-700 body-font bg-gray-100 rounded">
+    <div class="container px-5 py-8 mx-auto flex flex-col sm:-mt-10">
+      <div class="mx-auto">
+  
+        <div class="rounded-lg sm:h-32 overflow-hidden">
+  
+        </div>
+        <div class="flex flex-col sm:flex-row">
+          <div class="sm:w-2/3 sm:pl-8 sm:py-8 pt-4 sm:-mt-16 sm:text-left">
+            <h2 class="text-indigo-700 text-4xl title-font font-bold mb-2">{{post.title}}
+           
+  
+            </h2>
+  <p id="post-body">
+  {{post.body}}
+  </p>
+   
+            <div class="mb-5">
+              <button
+                class="text-gray-100 bg-gray-900 border-0 py-2 px-6 focus:outline-none hover:bg-gray-800 rounded text-lg"
+                >Comment</button>
+                <form action="" method="post">
+                  {%csrf_token%}
+              <div class="flex-wrap -m-2" x-show="open">
+                <div class="p-2 w-full">
+                  <div class="relative ">
+                    {{comment_form.body}}
+                  </div>
+                </div>
+                <div class="p-2 w-full">
+                  <button
+                    class="flex text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg mb-2">Submit</button>
+                 {%for comment in comments%}
+                  <div class="flex py-3 mt-4 bg-indigo-100 border-l-4 border-indigo-800 px-2 py-2 rounded-l">
+                    <div class="w-1/8">
+                      <div class="w-10 h-10 rounded-full border-2 border-indigo-700 inline-flex  text-gray-400">
+                        <img class="object-cover rounded-full w-20 shadow-2xl" src="{{post.author.profile.file.url}}">
+            
+                      </div>
+                      <div class="pb-2  ml-2">
+                        <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="w-7/8 ">
+                      <div class="flex justify-between">
+                        <div>
+                          <span class="font-bold text-pink-500">{{comment.author}} </span>
+                        
+                        </div>
+                        <div>
+                          <a href="#" class="text-gray-700 hover:text-black"><i class="fa fa-chevron-down"></i></a>
+                        </div>
+                      </div>
+                      <div class="">
+                        <p class="my-3 text-sm">{{comment.body}}</p>
+                      
+                      </div>
+                    </div>
+                  </div>
+                {%endfor%}
+                </div>
+              </div>
+              </form>
+            </div>
+  
+          </div>
+          <div class="sm:w-1/3 ml-4 sm:pr-8 sm:py-8 mx-8  mb-2">
+            <div class="w-20 h-20 rounded-full inline-flex items-center justify-center text-gray-400">
+              <img class="object-cover rounded-full w-20 shadow-2xl border-4 border-teal-400 ml-4" src="{{post.author.profile.file.url}}">
+  
+            </div>
+            <div class="flex flex-col items-center justify-center px-2 py-3 bg-indigo-700 -mt-12">
+              <h2 class="font-bold title-font mt-4 text-gray-100 text-lg">{{post.author.username}}</h2>
+              <div class="w-12 h-1 bg-pink-100 rounded mt-2 mb-4"></div>
+              <p class="font-medium text-lg text-gray-100">{{post.author.profile.bio|safe|truncatewords_html:10}}</p>
+             
+            </div>
+  
+  
+  
+          </div>
+  
+        </div>
+      </div>
+  
+  
+    </div>
+  
+  
+  </section>
+
+  {%endblock %}
+  
+  

@@ -53,7 +53,7 @@ def register(request):
 
 @login_required 
 def login_success(request): 
-    return redirect("profile")
+    return redirect("edit")
 
 
     
