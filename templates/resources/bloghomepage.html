@@ -1,0 +1,77 @@
+{%extends 'base.html' %}
+
+{%block title %}
+  Resources
+
+{%endblock%}
+
+
+{%block content %}
+
+<!-- Navbar -->
+<style>
+    .scroll-hidden::-webkit-scrollbar {
+        height: 0px;
+        background: transparent; /* make scrollbar transparent */
+    }
+    </style>
+
+    <nav class="bg-white shadow dark:bg-gray-800">
+        <div class="container px-6 py-3 mx-auto">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <a class="text-xl font-bold text-gray-800 dark:text-white md:text-2xl hover:text-gray-700 dark:hover:text-gray-300" href="{%url 'home'%}">Plat Ai</a>
+
+                       
+                    </div>
+
+                
+                </div>
+
+        </div>
+    </nav>
+
+
+<!-- EndNav -->
+
+
+
+
+
+<section class="text-gray-600 body-font overflow-hidden">
+    <div class="container px-5 py-24 mx-auto">
+      <div class="flex flex-wrap -m-12">
+
+        {% for post in posts %}
+        <div class="p-12 md:w-1/2 flex flex-col items-start">
+          <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">{{post.type_blog}}</span>
+          <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">{{post.title}}</h2>
+          <p class="leading-relaxed -mt-1">{{post.body|truncatewords:45|linebreaks}}</p>
+          <div class="flex items-center flex-wrap pb-4 mt-8  mb-4 border-b-2 border-gray-100 mt-auto w-full ">
+            <a class="text-indigo-500 inline-flex items-center bg-green-400 px-1 px-1" href="{{ post.get_absolute_url }}">Learn More
+    
+            </a>
+       
+          </div>
+          <a class="inline-flex items-center">
+            <span class="flex-grow flex flex-col pl-1">
+              <span class="title-font font-medium text-gray-900">{{post.author}}</span>
+              <span class="text-gray-400 text-xs tracking-widest mt-0.5">{{ post.publish }} </span>
+            </span>
+          </a>
+        </div>
+      
+
+        {%endfor %}
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Paginations -->
+
+  {% include "resources/pagination.html" with page=posts %}
+
+  {%endblock %}

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>EDUSOLVE: A Product for Educators</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css" />
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
+    <link rel="shortcut icon" href="/static/img/courses/vid.svg" type="image/x-icon">
+  </head>
+
+  <body class="antialiased text-indigo-100">
+  
+ <!-- component -->
+<div>
+  <div class="flex h-screen overflow-y-hidden bg-gray-900" x-data="setup()" x-init="$refs.loading.classList.add('hidden')">
+    <!-- Loading screen -->
+    <div
+      x-ref="loading"
+      class="fixed inset-0 z-50 flex items-center justify-center text-white bg-black bg-opacity-50"
+      style="backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px)"
+    >
+      Loading.....
+    </div>
+
+    <!-- Sidebar backdrop -->
+    <div
+      x-show.in.out.opacity="isSidebarOpen"
+      class="fixed inset-0 z-10 bg-black bg-opacity-20 lg:hidden"
+      style="backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px)"
+    ></div>
+
+    <!-- Sidebar -->
+    <aside
+      x-transition:enter="transition transform duration-300"
+      x-transition:enter-start="-translate-x-full opacity-30  ease-in"
+      x-transition:enter-end="translate-x-0 opacity-100 ease-out"
+      x-transition:leave="transition transform duration-300"
+      x-transition:leave-start="translate-x-0 opacity-100 ease-out"
+      x-transition:leave-end="-translate-x-full opacity-0 ease-in"
+      class="fixed inset-y-0 z-10 flex flex-col flex-shrink-0 w-64 max-h-screen overflow-hidden transition-all transform bg-gray-900  border-r-4  shadow-lg lg:z-auto lg:static lg:shadow-none"
+      :class="{'-translate-x-full lg:translate-x-0 lg:w-20': !isSidebarOpen}"
+    >
+      <!-- sidebar header -->
+      <div class="flex items-center justify-between flex-shrink-0 p-2" :class="{'lg:justify-center': !isSidebarOpen}">
+        <span class="text-xl font-semibold leading-8 tracking-wider uppercase whitespace-nowrap">
+          <img src="/static/img/courses/vid.svg" alt="" class="w-16 h-16">
+         
+        </span>
+        <button @click="toggleSidbarMenu()" class="p-4  lg:hidden">
+          <svg
+            class="w-6 h-6 text-gray-100"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <!-- Sidebar links -->
+      <nav class="flex-1 overflow-hidden ">
+        <ul class="overflow-hidden">
+          <li>
+            <a
+              href="#"
+              class="flex items-center p-2 space-x-2 hover:bg-indigo-700"
+              :class="{'justify-center': !isSidebarOpen}"
+            >
+              <span>
+                <svg
+                  class="w-6 h-6 text-indigo-100"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+              </span>
+              <span :class="{ 'lg:hidden': !isSidebarOpen }">Dashboard</span>
+            </a>
+          </li>
+          <!-- Sidebar Links... -->
+        </ul>
+      </nav>
+      <!-- Sidebar footer -->
+      <div class="flex-shrink-0 p-2   max-h-14">
+        <button
+          class="flex items-center justify-center w-full px-4 py-2 bg-red-500 space-x-1 font-medium tracking-wider uppercase hover:bg-red-600  rounded focus:outline-none focus:ring"
+        >
+          <span>
+            <svg
+              class="w-6 h-6 text-red-100"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          </span>
+          <span :class="{'lg:hidden': !isSidebarOpen}"> Logout </span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="flex flex-col flex-1 h-full overflow-hidden">
+      <!-- Navbar -->
+      <header class="flex-shrink-0 border-b-4 -4">
+        <div class="flex items-center justify-between p-2">
+          <!-- Navbar left -->
+          <div class="flex items-center space-x-3">
+            <span class="p-2 text-xl font-semibold tracking-wider uppercase lg:hidden text-indigo-700">
+              <img src="/static/img/courses/vid.svg" alt="" class="w-10 h-10" srcset="">
+            </span>
+            <!-- Toggle sidebar button -->
+            <button @click="toggleSidbarMenu()" class="p-2  focus:outline-none focus:ring">
+              <svg
+                class="w-4 h-4 text-gray-100"
+                :class="{'transform transition-transform -rotate-180': isSidebarOpen}"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Mobile search box -->
+          <div
+            x-show.transition="isSearchBoxOpen"
+            class="fixed inset-0 z-10 bg-black bg-opacity-20"
+            style="backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px)"
+          >
+            <div
+              @click.away="isSearchBoxOpen = false"
+              class="absolute inset-x-0 flex items-center justify-between p-2 bg-gray-900  shadow-md"
+            >
+              <div class="flex items-center flex-1 px-2 space-x-2">
+                <!-- search icon -->
+                <span>
+                  <svg
+                    class="w-6 h-6 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  class="w-full px-4 py-3 text-gray-100  focus:bg-gray-800  focus:outline-none"
+                />
+              </div>
+              <!-- close button -->
+              <button @click="isSearchBoxOpen = false" class="flex-shrink-0 p-4 ">
+                <svg
+                  class="w-4 h-4 text-gray-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Desktop search box -->
+          <div class="items-center hidden px-2 space-x-2 md:flex-1 md:flex md:mr-auto md:ml-5">
+            <!-- search icon -->
+            <span>
+              <svg
+                class="w-5 h-5 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Search"
+              class="px-4 py-3  bg-gray-900 hover:bg-gray-800  lg:max-w-sm md:py-2 md:flex-1 focus:outline-none md:focus:bg-gray-800  md:focus:shadow md:focus:border"
+            />
+          </div>
+
+          <!-- Navbar right -->
+          <div class="relative flex items-center space-x-3">
+            <!-- Search button -->
+            <button
+              @click="isSearchBoxOpen = true"
+              class="p-2 bg-gray-800  rounded-full  md:hidden focus:outline-none focus:ring hover:bg-gray-200"
+            >
+              <svg
+                class="w-6 h-6 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+
+            <div class="items-center hidden space-x-3 md:flex">
+              <!-- Notification Button -->
+              <div class="relative">
+                <!-- red dot -->
+                <div class="absolute right-0 p-1 bg-red-400 rounded-full  animate-ping"></div>
+                <div class="absolute right-0 p-1 bg-red-400 border-l-4 border-indigo-700  rounded-full "></div>
+                <button
+                @click="isSettingsPanelOpen = true"
+                  class="p-2 bg-gray-800  rounded-full  hover:bg-gray-200 focus:outline-none focus:ring"
+                >
+                  <svg
+                    class="w-6 h-6 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                </button>
+
+            
+              </div>
+
+              <!-- Services Button -->
+              <div x-data="{ isOpen: false }">
+                <button
+                  @click="isOpen = !isOpen"
+                  class="p-2 bg-gray-800  rounded-full  hover:bg-gray-200 focus:outline-none focus:ring"
+                >
+                  <svg
+                    class="w-6 h-6 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Dropdown -->
+                <div
+                  @click.away="isOpen = false"
+                  @keydown.escape="isOpen = false"
+                  x-show.transition.opacity="isOpen"
+                  class="absolute mt-3 transform bg-indigo-800 rounded-lg shadow-xl w-40 max-w-sm "
+                >
+                  <div class="p-4 text-lg font-medium border-b-4 ">Forum and Quizzer</div>
+                  <ul class="flex flex-col p-2 my-3 space-y-3">
+                    <li>
+                      <a href="#" class="flex items-start px-2 py-1 space-x-2  hover:bg-gray-800 ">
+                        <span class="block mt-1">
+                          <svg
+                            class="w-6 h-6 text-gray-500"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path fill="#fff" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path
+                              fill="#fff"
+                              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                            />
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"
+                            />
+                          </svg>
+                        </span>
+                        <span class="flex flex-col">
+                          <span class="text-lg">Atlassian</span>
+                          <span class="text-sm text-gray-100">Lorem ipsum dolor sit.</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" class="flex items-start px-2 py-1 space-x-2  hover:bg-gray-800 ">
+                        <span class="block mt-1">
+                          <svg
+                            class="w-6 h-6 text-gray-500"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                            />
+                          </svg>
+                        </span>
+                        <span class="flex flex-col">
+                          <span class="text-lg">Slack</span>
+                          <span class="text-sm text-gray-100"
+                            >Lorem ipsum, dolor sit amet consectetur adipisicing elit.</span
+                          >
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                  <div class="flex items-center justify-center p-4 text-blue-700 underline  ">
+                    <a href="#">Show all apps</a>
+                  </div>
+                </div>
+              </div>
+</div>
+
+            <!-- avatar button -->
+            <div class="relative" x-data="{ isOpen: false }">
+              <button @click="isOpen = !isOpen" class="p-1 bg-gray-200 rounded-full  focus:outline-none focus:ring">
+                <svg
+                    class="w-6 h-6 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                    />
+                  </svg>
+              </button>
+              <!-- green dot -->
+              <div class="absolute right-0 p-1 bg-green-400 rounded-full  bottom-3 animate-ping"></div>
+              <div class="absolute right-0 p-1 bg-green-400 border-l-4 border-indigo-700  border-white rounded-full  bottom-3"></div>
+
+              <!-- Dropdown card -->
+              <div
+                @click.away="isOpen = false"
+                x-show.transition.opacity="isOpen"
+                class="absolute mt-3 transform -translate-x-full bg-gray-900   shadow-lg min-w-max"
+              >
+                <div class="flex flex-col p-4 space-y-1 font-medium border-b-4 ">
+                  <span class="text-gray-800">Ahmed Kamel</span>
+                  <span class="text-sm text-gray-100">ahmed.kamel@example.com</span>
+                </div>
+                <ul class="flex flex-col p-2 my-2 space-y-1">
+                  <li>
+                    <a href="#" class="block px-2 py-1 transition  hover:bg-gray-700 border-l-4 border-indigo-700  hover:border-l-2 hover:border-indigo-500">Link</a>
+                  </li>
+                  <li>
+                    <a href="#" class="block px-2 py-1 transition  hover:bg-gray-800 ">Another Link</a>
+                  </li>
+                </ul>
+                <div class="flex items-center justify-center p-4 text-blue-700 underline  ">
+                  <a href="#">Logout</a>
+                </div>
+              </div>
+            </div>
+            <div class="relative" x-data="{ isOpen: false }">
+              <button @click="isOpen = !isOpen" class="p-1 bg-gray-200 rounded-full  focus:outline-none focus:ring">
+                <img
+                  class="object-cover w-8 h-8 rounded-full "
+                  src="https://avatars0.githubusercontent.com/u/57622665?s=460&u=8f581f4c4acd4c18c33a87b3e6476112325e8b38&v=4"
+                  alt="Ahmed Kamel"
+                />
+              </button>
+              <!-- green dot -->
+              <div class="absolute right-0 p-1 bg-green-400 rounded-full  bottom-3 animate-ping"></div>
+              <div class="absolute right-0 p-1 bg-green-400 border-l-4 border-indigo-700  border-white rounded-full  bottom-3"></div>
+
+              <!-- Dropdown card -->
+              <div
+                @click.away="isOpen = false"
+                x-show.transition.opacity="isOpen"
+                class="absolute mt-3 transform -translate-x-full bg-gray-900   shadow-lg min-w-max"
+              >
+                <div class="flex flex-col p-4 space-y-1 font-medium border-b-4 ">
+                  <span class="text-gray-800">Ahmed Kamel</span>
+                  <span class="text-sm text-gray-100">ahmed.kamel@example.com</span>
+                </div>
+                <ul class="flex flex-col p-2 my-2 space-y-1">
+                  <li>
+                    <a href="#" class="block px-2 py-1 transition  hover:bg-gray-700 border-l-4 border-indigo-700  hover:border-l-2 hover:border-indigo-500">Link</a>
+                  </li>
+                  <li>
+                    <a href="#" class="block px-2 py-1 transition  hover:bg-gray-800 ">Another Link</a>
+                  </li>
+                </ul>
+                <div class="flex items-center justify-center p-4 text-blue-700 underline  ">
+                  <a href="#">Logout</a>
+                </div>
+              </div>
+            </div>
+        
+          </div>
+        </div>
+      </header>
+      <!-- Main content -->
+      <main class="flex-1 max-h-full p-5 overflow-hidden overflow-y-scroll">
+        <!-- Main content header -->
+        <div
+          class="flex flex-col items-start justify-between pb-6 space-y-4 border-b-4  lg:items-center lg:space-y-0 lg:flex-row"
+        >
+          <h1 class="text-2xl font-semibold whitespace-nowrap">Dashboard</h1>
+  
+        </div>
+
+        <!-- Start Content -->
+        <div class="grid grid-cols-1 gap-5 mt-6 sm:grid-cols-2 lg:grid-cols-4">
+          <template x-for="i in 4" :key="i">
+            <div class="p-4 transition-shadow bg-gray-800 rounded-lg shadow-sm hover:shadow-xl">
+              <div class="flex items-start justify-between">
+                <div class="flex flex-col space-y-2">
+                  <span class="text-gray-100">Total Users</span>
+                  <span class="text-lg font-semibold">100,221</span>
+                </div>
+                <div class="p-10 bg-gray-200 rounded-full"></div>
+              </div>
+              <div>
+                <span class="inline-block px-2 text-sm text-white bg-green-600 rounded-full hover:shadow-lg ">14%</span>
+                <span>from 2019</span>
+              </div>
+            </div>
+          </template>
+        </div>
+
+         
+        <div class="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-2 xl:grid-cols-4">
+          <!-- Import data card -->
+         
+
+       
+          <div class="rounded-lg shadow-sm xl:col-span-3 bg-gray-800">
+            <!-- Card header -->
+            <div class="flex items-center justify-between px-4 py-2">
+              <h5 class="font-semibold text-white">Title</h5>
+              <!-- Dots button -->
+              <button class="p-2 rounded-full">
+                <svg
+                  class="w-6 h-6 text-gray-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
+            </div>
+   
+            <!-- Chart -->
+            <div class="relative min-w-0">
+
+              <section class="text-gray-700 body-font overflow-hidden">
+                <div class="container  mx-auto">
+                  <div class=" mx-auto flex flex-wrap">
+            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Explicabo, obcaecati! Nam ipsam saepe magni non dolore molestias laboriosam, ut ea, velit delectus iusto doloribus vel? Reprehenderit neque eligendi quidem laudantium voluptatum labore magnam ratione vero sapiente vel magni ullam, doloremque sunt ad debitis? Corrupti officia excepturi soluta vitae neque sequi nobis quibusdam consequatur repudiandae iusto? Modi consequatur neque explicabo, voluptate perspiciatis cupiditate ipsum. Exercitationem impedit quo nostrum, at, reiciendis, iste laborum fuga sit expedita odit vero labore provident? Inventore, ipsum similique fugit alias quas esse commodi odit, voluptatum amet dolore corrupti, praesentium aspernatur voluptatibus neque qui laborum earum at ipsam. Quasi, cupiditate odio impedit est, deserunt facere voluptatibus ipsam veritatis animi quibusdam, optio repellendus. Natus laudantium reprehenderit quo, ullam recusandae quia laboriosam atque nemo deserunt repellat molestiae ea, nisi fugit alias? Dolore error minima nam, tempora quasi vitae. Debitis blanditiis odit maiores voluptatibus facilis? Corrupti voluptatem, deleniti beatae similique temporibus blanditiis, repellendus nihil culpa quia, ipsum cupiditate harum animi? Cupiditate dignissimos, incidunt porro suscipit magni mollitia blanditiis neque, quae nesciunt, nulla molestias provident voluptate eaque voluptatum. Vitae inventore atque soluta perspiciatis quibusdam molestiae a repudiandae saepe totam? Rerum quos est sunt eaque! Placeat vel, dolorum unde perspiciatis earum repudiandae labore itaque, at aperiam rerum rem consequatur architecto fuga temporibus quaerat nisi? Tenetur voluptatem optio corrupti officiis, impedit adipisci hic illum delectus saepe earum eveniet, nam laudantium minus labore, iusto doloremque consequatur! Veritatis sed fugiat rem quod commodi maiores aut accusamus velit quam nulla maxime porro labore voluptatem amet dolorem quidem, laudantium assumenda atque! Libero fugiat in iste consequuntur ipsum qui suscipit reprehenderit ad excepturi quibusdam et facere dolores debitis at doloribus quas inventore illum hic, autem beatae cumque assumenda doloremque! Accusantium aspernatur nam ad repudiandae odit nulla doloremque exercitationem, sit soluta inventore quisquam consequatur, nostrum sequi qui ipsa? Aspernatur reiciendis velit laboriosam omnis hic, repellendus, adipisci dolor suscipit minima, nemo officiis animi iusto. Ut rem nobis minima quae dolore pariatur nihil eum, consequatur quos? Ratione rerum tenetur ducimus ipsam nam ullam vel dolore fugit laborum magnam exercitationem minus eaque quidem, ad tempora cumque aliquid optio corrupti aspernatur quisquam minima commodi. Quasi tempora voluptates ducimus quod debitis eaque tenetur facilis molestiae fuga distinctio, at temporibus nostrum rerum, dicta sit, dolorum rem cupiditate voluptas vitae unde perferendis! Temporibus, nihil distinctio. Natus, placeat? Unde velit non veritatis inventore harum ut porro a dignissimos expedita eos, labore aut? Corrupti sequi dolorum architecto beatae quo qui cum voluptates. Obcaecati doloribus error unde ipsam ut ipsum incidunt atque, beatae harum consequuntur provident dolore maiores eum sint pariatur ex ullam molestias, eos excepturi cupiditate? Saepe magni alias qui quibusdam? Dolore ex, nisi cupiditate deleniti rem incidunt qui tempora quaerat quo nesciunt molestias voluptatum et laboriosam! Ab perspiciatis molestias cupiditate unde dolores nostrum veritatis?
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+          <div class="rounded-lg shadow-sm bg-gray-800">
+            <!-- Card header -->
+            <div class="flex items-center justify-between px-4 py-2 bg-indigo-600 rounded-lg">
+              <h5 class="font-semibold text-gray-100">Important notes</h5>
+              <!-- Dots button -->
+              <button class="p-2 rounded-full focus:outline-none">
+                <svg
+                  class="w-6 h-6 text-gray-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
+            </div>
+            <ul class="px-4 pb-4 space-y-4 divide-y">
+              <li class="flex items-start justify-between pt-4">
+                <div class="flex items-start space-x-3">
+
+                  <div>
+                    <h5 class="font-semibold">Quiz</h5>
+                    <span class="text-sm font-medium text-gray-900">Powered By Quizzer</span>
+                  </div>
+                </div>
+                <a href="#" class="flex items-center px-2 py-2 space-x-2 text-sm text-white bg-indigo-600 rounded-md">
+                  <span>Solve</span>
+       
+                </a>
+              </li>
+
+              <li class="pt-4 text-sm font-medium text-gray-900">
+                Save your note.
+                <textarea id="message" name="message" class="w-full bg-gray-400 rounded border border-gray-700 focus:border-indigo-500 h-32 text-base outline-none text-gray-900 leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                <button class="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">Save</button>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+        <h3 class="mt-6 text-xl">Users</h3>
+        <div class="flex flex-col mt-6">
+          <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              <div class="overflow-hidden border-b-4  border-gray-200  shadow-md">
+                <table class="min-w-full overflow-x-scroll divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Title
+                      </th>
+                      <th
+                        scope="col"
+                        class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Role
+                      </th>
+                      <th scope="col" class="relative px-6 py-3">
+                        <span class="sr-only">Edit</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-gray-900  divide-y divide-gray-200">
+                    <template x-for="i in 10" :key="i">
+                      <tr class="transition-all hover:bg-gray-800  hover:shadow-lg">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <div class="flex-shrink-0 w-10 h-10">
+                              <img
+                                class="w-10 h-10 rounded-full "
+                                src="https://avatars0.githubusercontent.com/u/57622665?s=460&u=8f581f4c4acd4c18c33a87b3e6476112325e8b38&v=4"
+                                alt=""
+                              />
+                            </div>
+                            <div class="ml-4">
+                              <div class="text-sm font-medium text-gray-900">Ahmed Kamel</div>
+                              <div class="text-sm text-gray-500">ahmed.kamel@example.com</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm text-gray-900">Regional Paradigm Technician</div>
+                          <div class="text-sm text-gray-500">Optimization</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span
+                            class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full "
+                          >
+                            Active
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">Admin</td>
+                        <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                          <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+ 
+    <!-- Settings panel -->
+    <div
+      x-show="isSettingsPanelOpen"
+      @click.away="isSettingsPanelOpen = false"
+      x-transition:enter="transition transform duration-300"
+      x-transition:enter-start="translate-x-full opacity-30  ease-in"
+      x-transition:enter-end="translate-x-0 opacity-100 ease-out"
+      x-transition:leave="transition transform duration-300"
+      x-transition:leave-start="translate-x-0 opacity-100 ease-out"
+      x-transition:leave-end="translate-x-full opacity-0 ease-in"
+      class="fixed inset-y-0 right-0 flex flex-col bg-gray-900  shadow-lg bg-opacity-20 w-full"
+      style="backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px)"
+    >
+      <div class="flex items-center justify-between flex-shrink-0 p-2 bg-indigo-700">
+        <h6 class="p-2 text-lg ">Notifications</h6>
+        <button @click="isSettingsPanelOpen = false" class="p-2  focus:outline-none focus:ring">
+          <svg
+            class="w-6 h-6 text-gray-100"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="max-h-screen overflow-y-scroll hover:overflow-y-scroll">
+        <section class="text-gray-400 bg-gray-900 body-font">
+          <div class="container py-4 mx-auto">
+            <div class="flex flex-wrap -m-4">
+              <div class="p-4 lg:w-1/3">
+                <div class="h-full bg-gray-800 bg-opacity-40 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative">
+                  <h2 class="tracking-widest text-xs title-font font-medium text-gray-500 mb-1">CATEGORY</h2>
+                  <h1 class="title-font sm:text-2xl text-xl font-medium text-white mb-3">Raclette Blueberry Nextious Level</h1>
+                  <p class="leading-relaxed mb-3">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  <a class="text-indigo-400 inline-flex items-center">Learn More
+                    <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"></path>
+                      <path d="M12 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                  <div class="text-center mt-2 leading-none flex justify-center absolute bottom-0 left-0 w-full py-4">
+                    <span class="text-gray-500 mr-3 inline-flex items-center leading-none text-sm pr-3 py-1 border-r-2 border-gray-700 border-opacity-50">
+                      <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>1.2K
+                    </span>
+                    <span class="text-gray-500 inline-flex items-center leading-none text-sm">
+                      <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
+                      </svg>6
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 lg:w-1/3">
+                <div class="h-full bg-gray-800 bg-opacity-40 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative">
+                  <h2 class="tracking-widest text-xs title-font font-medium text-gray-500 mb-1">CATEGORY</h2>
+                  <h1 class="title-font sm:text-2xl text-xl font-medium text-white mb-3">Ennui Snackwave Thundercats</h1>
+                  <p class="leading-relaxed mb-3">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  <a class="text-indigo-400 inline-flex items-center">Learn More
+                    <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"></path>
+                      <path d="M12 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                  <div class="text-center mt-2 leading-none flex justify-center absolute bottom-0 left-0 w-full py-4">
+                    <span class="text-gray-500 mr-3 inline-flex items-center leading-none text-sm pr-3 py-1 border-r-2 border-gray-700 border-opacity-50">
+                      <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>1.2K
+                    </span>
+                    <span class="text-gray-500 inline-flex items-center leading-none text-sm">
+                      <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
+                      </svg>6
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 lg:w-1/3">
+                <div class="h-full bg-gray-800 bg-opacity-40 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative">
+                  <h2 class="tracking-widest text-xs title-font font-medium text-gray-500 mb-1">CATEGORY</h2>
+                  <h1 class="title-font sm:text-2xl text-xl font-medium text-white mb-3">Selvage Poke Waistcoat Godard</h1>
+                  <p class="leading-relaxed mb-3">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  <a class="text-indigo-400 inline-flex items-center">Learn More
+                    <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"></path>
+                      <path d="M12 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                  <div class="text-center mt-2 leading-none flex justify-center absolute bottom-0 left-0 w-full py-4">
+                    <span class="text-gray-500 mr-3 inline-flex items-center leading-none text-sm pr-3 py-1 border-r-2 border-gray-700 border-opacity-50">
+                      <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>1.2K
+                    </span>
+                    <span class="text-gray-500 inline-flex items-center leading-none text-sm">
+                      <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
+                      </svg>6
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="text-gray-400 bg-gray-900 body-font">
+          <div class="container px-5 py-24 mx-auto">
+            <div class="flex flex-col text-center w-full mb-20">
+              <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-white">Master Cleanse Reliac Heirloom</h1>
+              <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Whatever cardigan tote bag tumblr hexagon brooklyn asymmetrical gentrify, subway tile poke farm-to-table. Franzen you probably haven't heard of them man bun deep jianbing selfies heirloom.</p>
+            </div>
+            <div class="flex flex-wrap -m-4">
+              <div class="lg:w-1/3 sm:w-1/2 p-4">
+                <div class="flex relative">
+                  <img alt="gallery" class="absolute inset-0 w-full h-full object-cover object-center" src="https://dummyimage.com/600x360">
+                  <div class="px-8 py-10 relative z-10 w-full border-4 border-gray-800 bg-gray-900 opacity-0 hover:opacity-100">
+                    <h2 class="tracking-widest text-sm title-font font-medium text-indigo-400 mb-1">THE SUBTITLE</h2>
+                    <h1 class="title-font text-lg font-medium text-white mb-3">Shooting Stars</h1>
+                    <p class="leading-relaxed">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:w-1/3 sm:w-1/2 p-4">
+                <div class="flex relative">
+                  <img alt="gallery" class="absolute inset-0 w-full h-full object-cover object-center" src="https://dummyimage.com/601x361">
+                  <div class="px-8 py-10 relative z-10 w-full border-4 border-gray-800 bg-gray-900 opacity-0 hover:opacity-100">
+                    <h2 class="tracking-widest text-sm title-font font-medium text-indigo-400 mb-1">THE SUBTITLE</h2>
+                    <h1 class="title-font text-lg font-medium text-white mb-3">The Catalyzer</h1>
+                    <p class="leading-relaxed">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:w-1/3 sm:w-1/2 p-4">
+                <div class="flex relative">
+                  <img alt="gallery" class="absolute inset-0 w-full h-full object-cover object-center" src="https://dummyimage.com/603x363">
+                  <div class="px-8 py-10 relative z-10 w-full border-4 border-gray-800 bg-gray-900 opacity-0 hover:opacity-100">
+                    <h2 class="tracking-widest text-sm title-font font-medium text-indigo-400 mb-1">THE SUBTITLE</h2>
+                    <h1 class="title-font text-lg font-medium text-white mb-3">The 400 Blows</h1>
+                    <p class="leading-relaxed">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:w-1/3 sm:w-1/2 p-4">
+                <div class="flex relative">
+                  <img alt="gallery" class="absolute inset-0 w-full h-full object-cover object-center" src="https://dummyimage.com/602x362">
+                  <div class="px-8 py-10 relative z-10 w-full border-4 border-gray-800 bg-gray-900 opacity-0 hover:opacity-100">
+                    <h2 class="tracking-widest text-sm title-font font-medium text-indigo-400 mb-1">THE SUBTITLE</h2>
+                    <h1 class="title-font text-lg font-medium text-white mb-3">Neptune</h1>
+                    <p class="leading-relaxed">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:w-1/3 sm:w-1/2 p-4">
+                <div class="flex relative">
+                  <img alt="gallery" class="absolute inset-0 w-full h-full object-cover object-center" src="https://dummyimage.com/605x365">
+                  <div class="px-8 py-10 relative z-10 w-full border-4 border-gray-800 bg-gray-900 opacity-0 hover:opacity-100">
+                    <h2 class="tracking-widest text-sm title-font font-medium text-indigo-400 mb-1">THE SUBTITLE</h2>
+                    <h1 class="title-font text-lg font-medium text-white mb-3">Holden Caulfield</h1>
+                    <p class="leading-relaxed">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:w-1/3 sm:w-1/2 p-4">
+                <div class="flex relative">
+                  <img alt="gallery" class="absolute inset-0 w-full h-full object-cover object-center" src="https://dummyimage.com/606x366">
+                  <div class="px-8 py-10 relative z-10 w-full border-4 border-gray-800 bg-gray-900 opacity-0 hover:opacity-100">
+                    <h2 class="tracking-widest text-sm title-font font-medium text-indigo-400 mb-1">THE SUBTITLE</h2>
+                    <h1 class="title-font text-lg font-medium text-white mb-3">Alper Kamu</h1>
+                    <p class="leading-relaxed">Photo booth fam kinfolk cold-pressed sriracha leggings jianbing microdosing tousled waistcoat.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
+  <script>
+    const setup = () => {
+      return {
+        loading: true,
+        isSidebarOpen: false,
+        toggleSidbarMenu() {
+          this.isSidebarOpen = !this.isSidebarOpen
+        },
+        isSettingsPanelOpen: false,
+        isSearchBoxOpen: false,
+      }
+    }
+  </script>
+</div>
+  </body>
+</html>

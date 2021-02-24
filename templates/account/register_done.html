@@ -1,0 +1,14 @@
+{%extends 'base.html' %}
+
+{%block content %}
+<section class="text-gray-500 bg-gray-900 body-font">
+    <div class="container px-5 py-24 mx-auto">
+      <div class="lg:w-2/3 flex flex-col sm:flex-row sm:items-center items-start mx-auto ">
+        <h1 class="flex-grow sm:pr-16 text-2xl font-medium title-font text-white">Welcome to platai {{new_user.username}}</h1>
+        <a href="{%url 'login'%}">
+        <button class="flex-shrink-0 text-white bg-indigo-700 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-800 rounded text-lg mt-10 sm:mt-0">Login</button></a>
+      </div>
+    </div>
+  </section>
+
+{%endblock %}

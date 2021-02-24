@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '%36t^b71hb*rd76m#2va0jdh6b1z@2$02(1!0ww2ch(@_(_@%#'
+SECRET_KEY = '1234'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -133,5 +133,7 @@ EMAIL_BACKEND	=	'django.core.mail.backends.console.EmailBackend'
 
 #Our Custom apps will be added here
 INSTALLED_APPS+=[
-    'accounts.apps.AccountsConfig'
+    'member.apps.MemberConfig',
+    'blog.apps.BlogConfig',
+    'contact.apps.ContactConfig',
 ]
